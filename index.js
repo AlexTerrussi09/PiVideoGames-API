@@ -17,16 +17,18 @@
 //     =====`-.____`.___ \_____/___.-`___.-'=====
 //                       `=---='
 //     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+require("dotenv").config();
 const server = require('./src/app.js');
 const { conn } = require('./src/db.js');
 const { buscarGeneros, buscarJuegos, buscarPlataformas } = require('./src/helpers/cargarDb.js');
+const port = process.env.PORT || 0
 
 // Syncing all the models at once.
 conn.sync({ force: true }).then(() => {
   buscarGeneros();
   buscarPlataformas()
   //buscarJuegos();
-  server.listen(3001, () => {
-    console.log('%s listening at 3001'); // eslint-disable-line no-console
+  server.listen(port, () => {
+    console.log(`%s listening at ${port}`); // eslint-disable-line no-console
   });
 });
