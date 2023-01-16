@@ -26,7 +26,7 @@ conn.sync({ force: true }).then(() => {
   buscarGeneros();
   buscarPlataformas()
   //buscarJuegos();
-  server.listen(3001, () => {
+  server.listen(0, () => {
     console.log('%s listening at 3001'); // eslint-disable-line no-console
   });
 });
