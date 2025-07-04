@@ -7,11 +7,12 @@ const {
   DB_NAME,
   DB_USER,
   DB_PASSWORD,
-  DB_HOST
+  DB_HOST,
+  INTERNAL_DB_URL
 } = process.env
 
 
-const sequelize = new Sequelize(`postgresql://${ DB_USER }:${ DB_PASSWORD }@${ DB_HOST }:${ DB_PORT }/${ DB_NAME }`, {
+const sequelize = new Sequelize(`${INTERNAL_DB_URL}`, {
   logging: false, // set to console.log to see the raw SQL queries
   native: false, // lets Sequelize know we can use pg-native for ~30% more speed
 });
@@ -37,11 +38,11 @@ sequelize.models = Object.fromEntries(capsEntries);
 // Para relacionarlos hacemos un destructuring
 const { Videogame, Genero, Plataforma } = sequelize.models;
 
-Videogame.belongsToMany(Genero, { through : "GeneroVideogame"})
-Genero.belongsToMany(Videogame, { through : "GeneroVideogame"})
+Videogame.belongsToMany(Genero, { through: "GeneroVideogame" })
+Genero.belongsToMany(Videogame, { through: "GeneroVideogame" })
 
-Videogame.belongsToMany(Plataforma, {through: "PlataformaVideogame"})
-Plataforma.belongsToMany(Videogame, {through: "PlataformaVideogame"})
+Videogame.belongsToMany(Plataforma, { through: "PlataformaVideogame" })
+Plataforma.belongsToMany(Videogame, { through: "PlataformaVideogame" })
 
 
 
