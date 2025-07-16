@@ -1,64 +1,63 @@
 require('dotenv').config();
-const {API_KEY} = process.env
+const { API_KEY } = process.env
 const axios = require('axios')
 module.exports = {
- getAllVideogamesApi: async() => {
-    try {
-        
-        const pagina1 = await axios.get(`https://api.rawg.io/api/games?key=${API_KEY}`)
-        .then(ele => ele.data.results)
-        const pagina2 = await axios.get(`https://api.rawg.io/api/games?key=${API_KEY}&page=2`)
-        .then(ele => ele.data.results)
-        const pagina3 = await axios.get(`https://api.rawg.io/api/games?key=${API_KEY}&page=3`)
-        .then(ele => ele.data.results)
-        const pagina4 = await axios.get(`https://api.rawg.io/api/games?key=${API_KEY}&page=4`)
-        .then(ele => ele.data.results)
-        const pagina5 = await axios.get(`https://api.rawg.io/api/games?key=${API_KEY}&page=5`)
-        .then(ele => ele.data.results)
+    getAllVideogamesApi: async () => {
+        try {
+            const totalPages = 5;
+            const urls = Array.from({ length: totalPages }, (_, i) =>
+                `https://api.rawg.io/api/games?key=${API_KEY}&page=${i + 1}`
+            );
 
-        const paginas = [...pagina1,...pagina2,...pagina3,...pagina4,...pagina5]
-        return paginas.map(ele => ({
-            name: ele.name,
-            background_image: ele.background_image,
-            Generos: ele.genres.map(g => g.name),
-            Plataformas: ele.platforms.map(plat => plat.platform.name),
-            rating: ele.rating,
-            releaseDate : ele.released
-        }))
-    } catch (error) {
-        throw new Error("Error")
-    }
-},
-getAllGenres: async () => {
-    try {
-        return await axios.get(`https://api.rawg.io/api/genres?key=${API_KEY}`)
-            .then(datos => datos.data.results.map(dato => ({ name: dato.name })))
-    } catch (error) {
-        throw new Error("Error")
-    }
-},
+            const responses = await Promise.all(
+                urls.map(url => axios.get(url).then(res => res.data.results))
+            );
 
-getVideogameApiById: async(id) => {
-    try {
-        
-        const juego = await axios.get(`https://api.rawg.io/api/games/${id}?key=${API_KEY}`)
-        let arrayObj = [juego.data].map(ele => ({
-            id: ele.id,
-            name: ele.name,
-            background_image: ele.background_image,
-            Generos: ele.genres.map(gen => gen.name),
-            description: ele.description_raw,
-            releaseDate : ele.released,
-            rating: ele.rating,
-            Plataformas: ele.platforms.map(plat => plat.platform.name)
-        }))
-        return arrayObj[0]
-    } catch (error) {
-        throw new Error("Error")
-    }
+            const juegos = responses.flat();
+
+            return juegos.map(game => ({
+                name: game.name,
+                background_image: game.background_image,
+                Generos: game.genres.map(g => g.name),
+                Plataformas: game.platforms.map(p => p.platform.name),
+                rating: game.rating,
+                releaseDate: game.released
+            }));
+        } catch (error) {
+            console.error("Error al obtener juegos desde la API:", error.message);
+            throw new Error("No se pudieron obtener los videojuegos desde la API.");
+        }
     },
-    
-    getAllPlatforms:  () => {
+    getAllGenres: async () => {
+        try {
+            return await axios.get(`https://api.rawg.io/api/genres?key=${API_KEY}`)
+                .then(datos => datos.data.results.map(dato => ({ name: dato.name })))
+        } catch (error) {
+            throw new Error("Error")
+        }
+    },
+
+    getVideogameApiById: async (id) => {
+        try {
+
+            const juego = await axios.get(`https://api.rawg.io/api/games/${id}?key=${API_KEY}`)
+            let arrayObj = [juego.data].map(ele => ({
+                id: ele.id,
+                name: ele.name,
+                background_image: ele.background_image,
+                Generos: ele.genres.map(gen => gen.name),
+                description: ele.description_raw,
+                releaseDate: ele.released,
+                rating: ele.rating,
+                Plataformas: ele.platforms.map(plat => plat.platform.name)
+            }))
+            return arrayObj[0]
+        } catch (error) {
+            throw new Error("Error")
+        }
+    },
+
+    getAllPlatforms: () => {
         try {
             const array = [
                 {
@@ -258,9 +257,9 @@ getVideogameApiById: async(id) => {
                     name: "Game Gear"
                 }
             ]
-        return array        
+            return array
         } catch (error) {
             throw new Error("Error")
         }
-        },
+    },
 }
