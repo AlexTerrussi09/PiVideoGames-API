@@ -21,7 +21,8 @@ module.exports = {
                 Generos: game.genres.map(g => g.name),
                 Plataformas: game.platforms.map(p => p.platform.name),
                 rating: game.rating,
-                releaseDate: game.released
+                releaseDate: game.released,
+                description: "",
             }));
         } catch (error) {
             console.error("Error al obtener juegos desde la API:", error.message);

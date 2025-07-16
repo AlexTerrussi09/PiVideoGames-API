@@ -15,7 +15,6 @@ module.exports = {
     buscarJuegos: async () => {
         try {
             let juegos = await getAllVideogamesApi()
-            console.log("JUEGOS-------------------------------\n", juegos)
             await Videogame.bulkCreate(juegos)
 
         } catch (error) {

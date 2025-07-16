@@ -13,6 +13,7 @@ videogamesRouter.get('/', async (req, res) => {
                 { model: Plataforma, attributes: ['name'], through: { attributes: [] } }
             ]
         });
+        console.log(juegos)
 
         if (!name) {
             return res.status(200).json(juegos);
@@ -79,6 +80,15 @@ videogamesRouter.post('/', async (req, res) => {
         res.status(400).send(error.message)
     }
 })
+videogamesRouter.post('/bulk', async (req, res) => {
+    const data = req.body;
+    try {
+        const newVideogames = await Videogame.bulkCreate(data);
+        res.status(201).send(newVideogames)
+    } catch (error) {
+        res.status(400).send(error.message)
+    }
+});
 videogamesRouter.delete('/:idVideogame', async (req, res) => {
     const { idVideogame } = req.params;
     try {
