@@ -26,7 +26,7 @@ const port = process.env.PORT || 0;
 conn.sync({ force: true }).then(() => {
   buscarGeneros();
   buscarPlataformas()
-  //buscarJuegos();
+  buscarJuegos();
   server.listen(port, () => {
     console.log(`%s listening at ${port}`); // eslint-disable-line no-console
   });

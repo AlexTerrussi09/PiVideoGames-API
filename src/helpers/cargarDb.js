@@ -12,16 +12,16 @@ module.exports =  {
          Error("Error")
         }
     },
-    // buscarJuegos : async() => {
-    //     try {
-    //         let juegos = await getAllVideogamesApi()
-    //         console.log("JUEGOS-------------------------------\n",juegos.slice(0,15))
-    //        Videogame.bulkCreate(juegos)
+    buscarJuegos : async() => {
+        try {
+            let juegos = await getAllVideogamesApi()
+            console.log("JUEGOS-------------------------------\n",juegos)
+            await  Videogame.bulkCreate(juegos)
             
-    //     } catch (error) {
-    //         throw new Error("Error")
-    //     }
-    // },
+        } catch (error) {
+             Error("Error")
+        }
+    },
     buscarPlataformas : async ()=>{
         try {
             let plat = getAllPlatforms()
