@@ -18,7 +18,6 @@ module.exports = {
 
         const paginas = [...pagina1,...pagina2,...pagina3,...pagina4,...pagina5]
         return paginas.map(ele => ({
-            id: ele.id,
             name: ele.name,
             background_image: ele.background_image,
             Generos: ele.genres.map(g => g.name),
