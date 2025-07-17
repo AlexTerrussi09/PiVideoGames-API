@@ -7,13 +7,21 @@ videogamesRouter.get('/', async (req, res) => {
     const { name } = req.query;
 
     try {
-        const juegos = await Videogame.findAll({
+        const juegosDb = await Videogame.findAll({
             include: [
-                { model: Genero, attributes: ['name'], through: { attributes: [] } },
-                { model: Plataforma, attributes: ['name'], through: { attributes: [] } }
+            { model: Genero, attributes: ['name'], through: { attributes: [] } },
+            { model: Plataforma, attributes: ['name'], through: { attributes: [] } }
             ]
         });
-        console.log(juegos)
+        console.log("juegosDb=========================\n", juegosDb.slice(0, 5))
+
+        const juegos = juegosDb.map(juego => ({
+            ...juego.toJSON(),
+            Generos: juego.Generos || juego.Generos ? juego.Generos : juego.Generos,
+            Plataformas: juego.Plataformas || juego.Plataformas ? juego.Plataformas : juego.Plataformas
+        }));
+        console.log("juegos====================================\n", juegos.slice(0, 5))
+
 
         if (!name) {
             return res.status(200).json(juegos);
