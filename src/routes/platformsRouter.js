@@ -1,6 +1,6 @@
 const express = require('express');
 const platformsRouter = express.Router();
-const { Plataforma } = require('../db') 
+const { Plataforma } = require('../db')
 
 platformsRouter.get('/', async (req, res) => {
     try {
@@ -15,7 +15,7 @@ platformsRouter.post('/bulk', async (req, res) => {
         const data = req.body;
         const newPlatform = await Plataforma.bulkCreate(data);
         res.status(201).send(newPlatform)
-        
+
     } catch (error) {
         res.status(400).send(error.message)
     }

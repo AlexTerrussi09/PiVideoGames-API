@@ -51,17 +51,12 @@ videogamesRouter.get('/', async (req, res) => {
 videogamesRouter.get('/:idVideogame', async (req, res) => {
     const { idVideogame } = req.params
     try {
-        if (String(Number(idVideogame)) === "NaN") {
             let juegoDb = await Videogame.findOne({
                 where: { id: idVideogame },
                 include: [{ model: Genero, attributes: ['name'], through: { attributes: [] } },
                 { model: Plataforma, attributes: ['name'], through: { attributes: [] } }]
             })
             return res.status(200).send(juegoDb)
-        } else {
-            let juegoApi = await getVideogameApiById(idVideogame)
-            return res.status(200).send(juegoApi)
-        }
     }
     catch (error) {
         res.status(400).send(error.message)
