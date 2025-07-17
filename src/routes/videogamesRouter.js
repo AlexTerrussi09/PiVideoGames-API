@@ -1,5 +1,4 @@
 const express = require('express');
-const { getAllVideogamesApi, getVideogameApiById } = require('../helpers/helpers');
 const videogamesRouter = express.Router();
 const { Videogame, Genero, Plataforma } = require('../db')
 
@@ -13,14 +12,12 @@ videogamesRouter.get('/', async (req, res) => {
             { model: Plataforma, attributes: ['name'], through: { attributes: [] } }
             ]
         });
-        console.log("juegosDb=========================\n", juegosDb.slice(0, 5))
 
         const juegos = juegosDb.map(juego => ({
             ...juego.toJSON(),
             Generos: juego.Generos || juego.Generos ? juego.Generos : juego.Generos,
             Plataformas: juego.Plataformas || juego.Plataformas ? juego.Plataformas : juego.Plataformas
         }));
-        console.log("juegos====================================\n", juegos.slice(0, 5))
 
 
         if (!name) {
