@@ -21,7 +21,7 @@ require("dotenv").config();
 const server = require('./src/app.js');
 const { conn } = require('./src/db.js');
 const { loadInitialData } = require("./src/helpers/helpers.js");
-const port = process.env.DB_PORT || process.env.PORT;
+const port = process.env.DB_PORT;
 // Syncing all the models at once.
 conn.sync({ force: true}).then(() => {
   loadInitialData()
