@@ -1,59 +1,115 @@
 const express = require('express');
 const videogamesRouter = express.Router();
-const { Videogame, Genero, Plataforma } = require('../db')
+const { Videogame, Genero, Plataforma } = require('../db');
+const { Op } = require('sequelize');
+
 
 videogamesRouter.get('/', async (req, res) => {
-    const { name } = req.query;
+  const { name, genero, plataforma } = req.query;
 
-    try {
-        const juegosDb = await Videogame.findAll({
-            include: [
-            { model: Genero, attributes: ['name'], through: { attributes: [] } },
-            { model: Plataforma, attributes: ['name'], through: { attributes: [] } }
-            ]
-        });
+  try {
+    let where = {};
+    const filters = [];
 
-        const juegos = juegosDb.map(juego => ({
-            ...juego.toJSON(),
-            Generos: juego.Generos || juego.Generos ? juego.Generos : juego.Generos,
-            Plataformas: juego.Plataformas || juego.Plataformas ? juego.Plataformas : juego.Plataformas
-        }));
+    // 1. Filtrar por géneros
+    if (genero) {
+      const generos = genero.split(',').map(g => g.trim());
 
+      const juegosConGenero = await Videogame.findAll({
+        include: {
+          model: Genero,
+          where: { name: { [Op.in]: generos } },
+          attributes: [],
+          through: { attributes: [] }
+        },
+        attributes: ['id']
+      });
 
-        if (!name) {
-            return res.status(200).json(juegos);
-        }
-
-        const search = name.replace(/\s+/g, '').toLowerCase();
-
-        const coincidencias = juegos
-            .filter(juego =>
-                juego.name.replace(/\s+/g, '').toLowerCase().includes(search)
-            )
-            .slice(0, 15);
-
-        if (coincidencias.length === 0) {
-            return res.status(404).send(`No se encontró ningún juego con el nombre "${name}"`);
-        }
-
-        return res.status(200).json(coincidencias);
-
-    } catch (error) {
-        console.error("Error al obtener videojuegos:", error);
-        return res.status(500).send("Error interno del servidor");
+      const idsGenero = juegosConGenero.map(j => j.id);
+      filters.push(idsGenero);
     }
-});
 
+    // 2. Filtrar por plataformas
+    if (plataforma) {
+      const plataformas = plataforma.split(',').map(p => p.trim());
+
+      const juegosConPlataforma = await Videogame.findAll({
+        include: {
+          model: Plataforma,
+          where: { name: { [Op.in]: plataformas } },
+          attributes: [],
+          through: { attributes: [] }
+        },
+        attributes: ['id']
+      });
+
+      const idsPlataforma = juegosConPlataforma.map(j => j.id);
+      filters.push(idsPlataforma);
+    }
+
+    // 3. Intersección de filtros
+    if (filters.length > 0) {
+      const idsFinales = filters.reduce((a, b) => a.filter(id => b.includes(id)));
+      where.id = { [Op.in]: idsFinales };
+    }
+
+    // 4. Buscar videojuegos con todos sus géneros y plataformas
+    let videojuegos = await Videogame.findAll({
+      where,
+      include: [
+        {
+          model: Genero,
+          attributes: ['name'],
+          through: { attributes: [] }
+        },
+        {
+          model: Plataforma,
+          attributes: ['name'],
+          through: { attributes: [] }
+        }
+      ]
+    });
+
+    // 5. Filtrado por nombre si se pide
+    if (name) {
+      const normalizado = name.replace(/\s+/g, '').toLowerCase();
+      videojuegos = videojuegos.filter(j =>
+        j.name.replace(/\s+/g, '').toLowerCase().includes(normalizado)
+      );
+    }
+
+    if (videojuegos.length === 0) {
+      return res.status(404).send("No se encontraron videojuegos con esos filtros.");
+    }
+
+    const formateados = videojuegos.map(j => ({
+      id: j.id,
+      name: j.name,
+      background_image: j.background_image,
+      rating: j.rating,
+      releaseDate: j.releaseDate,
+      Generos: j.Generos.map(g => g.name),
+      Plataformas: j.Plataformas.map(p => p.name),
+      description: j.description
+    }));
+
+    res.status(200).json(formateados);
+
+  } catch (error) {
+    console.error("Error al filtrar videojuegos:", error.message);
+    res.status(500).send("Error interno del servidor.");
+  }
+});
 
 videogamesRouter.get('/:idVideogame', async (req, res) => {
     const { idVideogame } = req.params
     try {
-            let juegoDb = await Videogame.findOne({
-                where: { id: idVideogame },
-                include: [{ model: Genero, attributes: ['name'], through: { attributes: [] } },
-                { model: Plataforma, attributes: ['name'], through: { attributes: [] } }]
-            })
-            return res.status(200).send(juegoDb)
+        let juegoDb = await Videogame.findOne({
+            where: { id: idVideogame },
+            include: [{ model: Genero, attributes: ['name'], through: { attributes: [] } },
+            { model: Plataforma, attributes: ['name'], through: { attributes: [] } }]
+        })
+        return res.status(200).send(juegoDb)
     }
     catch (error) {
         res.status(400).send(error.message)
